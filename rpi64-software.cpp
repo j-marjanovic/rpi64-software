@@ -66,6 +66,13 @@ int main(int argc, char** argv){
 		                       SDL_SWSURFACE );
 
 	std::cout << "nr joysticks: " << SDL_NumJoysticks() << std::endl;
+	SDL_Joystick* gGameController = NULL;
+	if( SDL_NumJoysticks() > 0){
+		gGameController = SDL_JoystickOpen( 0 );
+		if( gGameController == NULL )
+			std::cout << SDL_GetError() << std::endl;
+	}
+
 
 	if (screen == NULL) return -1;
 
@@ -76,14 +83,20 @@ int main(int argc, char** argv){
 	Element top( "images/top.png" );
 
 	std::map<int, Element*> btns;
-	btns[SDLK_UP]    = new Element( "images/glow_yellow_top.png", false);
+/*	btns[SDLK_UP]    = new Element( "images/glow_yellow_top.png", false);
 	btns[SDLK_DOWN]  = new Element( "images/glow_yellow_bottom.png", false);
 	btns[SDLK_LEFT]  = new Element( "images/glow_yellow_left.png", false);
 	btns[SDLK_RIGHT] = new Element( "images/glow_yellow_right.png", false);
+*/
+
+	btns[0]    = new Element( "images/glow_A.png", false);
+	btns[1]    = new Element( "images/glow_B.png", false);
+	btns[2]    = new Element( "images/glow_Z.png", false);
 
 	// loop
 	bool stop = false;
 	SDL_Event event;
+	int joy_btn;
 
 	while( !stop ) {
 		while ( SDL_PollEvent(&event) ){
@@ -93,12 +106,19 @@ int main(int argc, char** argv){
 			} 
 			else if( event.type == SDL_KEYDOWN ){
 				std::cout << "SDL_KEYDOWN: " << event.key.keysym.sym << std::endl;
-				btns[event.key.keysym.sym]->show = true;
 			} 
 			else if ( event.type == SDL_KEYUP ){
 				std::cout << "SDL_KEYUP: " << event.key.keysym.sym << std::endl;
-				btns[event.key.keysym.sym]->show = false;
 			}
+			else if (event.type == SDL_JOYBUTTONDOWN ){
+				joy_btn = (int)event.jbutton.button;
+				if( btns.find(joy_btn) != btns.end() ) btns[joy_btn]->show = true;
+			} 
+                        else if (event.type == SDL_JOYBUTTONUP ){
+                        	joy_btn = (int)event.jbutton.button;
+                                if( btns.find(joy_btn) != btns.end() ) btns[joy_btn]->show = false;
+			}
+
 		}
 
 		SDL_FillRect(screen, NULL, 0x000000);
